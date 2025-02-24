@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Link, useParams } from "react-router-dom";
 
-const API_URL = "https://fakestoreapi.com/products"; 
+const API_URL = "https://fakestoreapi.com/products"; // Example API for products
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetch(API_URL)
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch products");
+                }
+                return res.json();
+            })
             .then((data) => setProducts(data))
-            .catch((error) => console.error("Error fetching products:", error));
+            .catch((error) => setError(error.message));
     }, []);
+
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <div>
@@ -30,14 +38,21 @@ const ProductList = () => {
 const ProductDetail = () => {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetch(`${API_URL}/${id}`)
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to fetch product details");
+                }
+                return res.json();
+            })
             .then((data) => setProduct(data))
-            .catch((error) => console.error("Error fetching product details:", error));
+            .catch((error) => setError(error.message));
     }, [id]);
 
+    if (error) return <p>Error: {error}</p>;
     if (!product) return <p>Loading...</p>;
 
     return (
